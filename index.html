@@ -3,144 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agenda Diaria — Jorge</title>
+<title>DAF Allianz — Estrategias Patrimoniales</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f5; color: #18181b; font-size: 14px; }
 
-  header { background: #18181b; color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header { background: #003781; color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
   header h1 { font-size: 18px; font-weight: 600; }
-  .header-sub { font-size: 12px; opacity: 0.6; margin-top: 2px; }
-  .header-right { text-align: right; }
-  .header-hora { font-size: 26px; font-weight: 700; }
-  .header-cierre { font-size: 12px; opacity: 0.7; margin-top: 2px; }
-  .hora-fin { background: #ef4444; color: white; padding: 1px 6px; border-radius: 4px; font-weight: 700; }
+  header span { font-size: 12px; opacity: 0.7; }
 
   .sync-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.7; margin-top: 4px; }
   .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
   .sync-dot.offline { background: #f59e0b; }
 
-  .container { max-width: 760px; margin: 24px auto; padding: 0 16px; }
+  .container { max-width: 860px; margin: 24px auto; padding: 0 16px; }
 
   .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 16px; border: 1px solid #e4e4e7; }
-  .card h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+  .card h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #71717a; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
 
-  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 180px; }
+  .field label { font-size: 11px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input, .field select, .field textarea { border: 1px solid #d4d4d8; border-radius: 6px; padding: 8px 10px; font-size: 14px; font-family: inherit; color: #18181b; background: #fafafa; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #003781; background: white; }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  .toggle-row { display: flex; gap: 8px; }
+  .toggle-btn { flex: 1; padding: 8px; border: 1px solid #d4d4d8; border-radius: 6px; background: #fafafa; cursor: pointer; font-size: 13px; font-weight: 500; color: #71717a; transition: all 0.15s; }
+  .toggle-btn.active { background: #003781; color: white; border-color: #003781; }
+  .toggle-btn:hover:not(.active) { background: #f0f0f0; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-yellow { background: #fef9c3; color: #ca8a04; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+
+  .checklist { display: flex; flex-direction: column; gap: 10px; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e4e4e7; transition: background 0.1s; }
+  .check-item.checked { background: #f0fdf4; border-color: #bbf7d0; }
+  .check-item input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; cursor: pointer; accent-color: #003781; flex-shrink: 0; }
+  .check-item .check-label { flex: 1; }
+  .check-item .check-label strong { display: block; font-weight: 500; font-size: 14px; }
+  .check-item .check-label span { font-size: 12px; color: #71717a; }
+
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #003781; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #e4e4e7; }
+
+  .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+  .alert-blue { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+  .alert-green { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
   .alert-yellow { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
-  .alert-blue   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
-  .alert-green  { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-  .alert-gray   { background: #f4f4f5; border: 1px solid #e4e4e7; color: #52525b; }
 
-  .progress-bar { height: 6px; background: #e4e4e7; border-radius: 3px; overflow: hidden; margin-top: 8px; }
-  .progress-fill { height: 100%; background: #18181b; border-radius: 3px; transition: width 0.3s; }
+  .progress-bar { height: 6px; background: #e4e4e7; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #003781; border-radius: 3px; transition: width 0.3s; }
   .progress-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #71717a; }
 
-  .task-list { display: flex; flex-direction: column; gap: 8px; }
-  .task-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e4e4e7; transition: all 0.15s; }
-  .task-item.done    { background: #f0fdf4; border-color: #bbf7d0; opacity: 0.65; }
-  .task-item.current { background: #fffbeb; border: 2px solid #fbbf24; }
-  .task-item input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; cursor: pointer; accent-color: #18181b; flex-shrink: 0; }
-  .task-content { flex: 1; }
-  .task-hora  { font-size: 11px; font-weight: 700; color: #a1a1aa; letter-spacing: 0.04em; margin-bottom: 2px; }
-  .task-label { font-weight: 500; font-size: 14px; }
-  .task-hint  { font-size: 12px; color: #71717a; margin-top: 2px; }
-  .task-item.done .task-label { text-decoration: line-through; color: #a1a1aa; }
+  .btn { padding: 9px 18px; border-radius: 7px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-primary { background: #003781; color: white; }
+  .btn-primary:hover { background: #002a63; }
+  .btn-outline { background: white; color: #003781; border: 1px solid #003781; }
+  .btn-outline:hover { background: #eff6ff; }
+  .btn-danger { background: white; color: #dc2626; border: 1px solid #fca5a5; }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-  .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
-  .tag-gnp       { background: #fee2e2; color: #dc2626; }
-  .tag-grab      { background: #fef9c3; color: #92400e; }
-  .tag-edit      { background: #eff6ff; color: #1d4ed8; }
+  .actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 
-  .btn-reset { padding: 5px 12px; border-radius: 6px; border: 1px solid #e4e4e7; background: white; color: #71717a; font-size: 11px; cursor: pointer; font-weight: 500; }
-  .btn-reset:hover { background: #f4f4f5; }
+  .hidden { display: none; }
 
-  .links-grid { display: flex; gap: 10px; flex-wrap: wrap; }
-  .link-card { flex: 1; min-width: 140px; padding: 12px 14px; border-radius: 8px; border: 1px solid #e4e4e7; text-decoration: none; color: #18181b; background: #fafafa; font-size: 13px; transition: all 0.15s; display: block; }
-  .link-card:hover { background: #f0f0f0; border-color: #d4d4d8; }
-  .link-title { font-weight: 600; margin-bottom: 2px; }
-  .link-sub   { font-size: 11px; color: #71717a; }
+  .tag { display: inline-block; background: #eff6ff; color: #1d4ed8; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+  .tag-med { background: #fef9c3; color: #92400e; }
 
-  .empty-rest { text-align: center; padding: 32px; color: #71717a; font-size: 14px; }
-  .loading-tasks { text-align: center; padding: 24px; color: #a1a1aa; font-size: 13px; }
+  .status-summary { display: flex; gap: 16px; padding: 12px 0; }
+  .stat { text-align: center; }
+  .stat .num { font-size: 24px; font-weight: 700; color: #003781; }
+  .stat .lbl { font-size: 11px; color: #71717a; text-transform: uppercase; letter-spacing: 0.04em; }
 
-  @media (max-width: 600px) { .links-grid { flex-direction: column; } }
+  .casos-lista { display: flex; flex-direction: column; gap: 8px; }
+  .caso-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; border: 1px solid #e4e4e7; background: #fafafa; cursor: pointer; transition: all 0.15s; }
+  .caso-item:hover { background: #eff6ff; border-color: #bfdbfe; }
+  .caso-item.activo { background: #eff6ff; border-color: #003781; }
+  .caso-item .caso-info { flex: 1; }
+  .caso-item .caso-nombre { font-weight: 600; font-size: 14px; }
+  .caso-item .caso-meta { font-size: 12px; color: #71717a; margin-top: 2px; }
+  .caso-item .caso-acciones { display: flex; gap: 6px; align-items: center; }
+  .caso-mini-progress { width: 60px; height: 4px; background: #e4e4e7; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .caso-mini-fill { height: 100%; background: #003781; border-radius: 2px; }
+  .empty-state { text-align: center; padding: 24px; color: #71717a; font-size: 13px; }
+
+  .caso-id-label { font-size: 11px; color: #a1a1aa; }
+
+  @media (max-width: 600px) { .row { flex-direction: column; } .status-summary { gap: 8px; } }
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1 id="header-saludo">Buenos días, Jorge</h1>
-    <div class="header-sub" id="header-fecha"></div>
+    <h1>DAF Allianz</h1>
+    <span>Estrategias Patrimoniales</span>
     <div class="sync-badge" id="sync-badge" style="display:none">
       <span class="sync-dot" id="sync-dot"></span>
       <span id="sync-label">Sincronizado</span>
     </div>
   </div>
-  <div class="header-right">
-    <div class="header-hora" id="hora-actual"></div>
-    <div class="header-cierre" id="header-cierre"></div>
-  </div>
+  <button class="btn btn-outline btn-sm" style="background:transparent;color:white;border-color:rgba(255,255,255,0.4)" onclick="nuevoCaso()">+ Nuevo Caso</button>
 </header>
 
 <div class="container">
 
-  <!-- ALERTA DEL DÍA -->
-  <div class="card" style="padding:0;overflow:hidden">
-    <div id="alerta-dia" class="alert"></div>
-  </div>
-
-  <!-- PROGRESO -->
   <div class="card">
-    <h2>Progreso del Día <button class="btn-reset" onclick="resetearDia()">Reiniciar</button></h2>
-    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
-    <div class="progress-label">
-      <span id="prog-label">0 de 0 tareas</span>
-      <span id="prog-pct">0%</span>
+    <h2>Casos <span id="casos-count" style="font-weight:400;color:#a1a1aa;font-size:12px"></span></h2>
+    <div class="casos-lista" id="casos-lista">
+      <div class="empty-state">Cargando...</div>
     </div>
   </div>
 
-  <!-- CHECKLIST -->
   <div class="card">
-    <h2>Tareas de Hoy</h2>
-    <div class="task-list" id="task-list"><div class="loading-tasks">Cargando...</div></div>
-    <div id="custom-divider" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#a1a1aa;padding:14px 0 6px;display:none">Imprevistos y pendientes extra</div>
-    <div class="task-list" id="custom-task-list"></div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <input type="text" id="nueva-tarea" placeholder="Agregar imprevisto o pendiente del día..."
-             style="flex:1;border:1px solid #d4d4d8;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;background:#fafafa;color:#18181b"
-             onkeydown="if(event.key==='Enter')agregarTarea()">
-      <button onclick="agregarTarea()" class="btn-reset" style="background:#18181b;color:white;border-color:#18181b;white-space:nowrap;padding:8px 14px">+ Agregar</button>
+    <h2>
+      <span id="form-titulo">Caso Actual</span>
+      <span class="caso-id-label" id="caso-id-label"></span>
+    </h2>
+    <div class="row">
+      <div class="field">
+        <label>Nombre del Cliente</label>
+        <input type="text" id="cliente" placeholder="Ej. José Manuel Cuevas">
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="field">
+        <label>Tipo de Cliente</label>
+        <div class="toggle-row">
+          <button class="toggle-btn" id="btn-nuevo" onclick="setTipoCliente('nuevo')">Cliente Nuevo</button>
+          <button class="toggle-btn active" id="btn-existente" onclick="setTipoCliente('existente')">Cliente Existente</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Producto</label>
+        <select id="producto">
+          <option value="plus">OptiMaxx Plus</option>
+          <option value="elite" selected>OptiMaxx Premier Elite</option>
+          <option value="patrimonial">OptiMaxx Premier Patrimonial</option>
+        </select>
+      </div>
+    </div>
+    <div id="alert-existente" class="alert alert-blue" style="margin-top:14px">
+      Cliente existente — documentos ya en expediente. Verifica que los tienes disponibles antes de proceder.
+    </div>
+    <div id="alert-nuevo" class="alert alert-yellow hidden" style="margin-top:14px">
+      Cliente nuevo — recopilacion completa de documentos requerida.
     </div>
   </div>
 
-  <!-- GNP TEXTO -->
-  <div class="card" id="card-gnp">
-    <h2>GNP → WhatsApp Octavio</h2>
-    <div style="background:#f4f4f5;border:1px solid #e4e4e7;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:600;letter-spacing:0.02em;color:#18181b" id="gnp-texto"></div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-      <button class="btn-reset" style="background:#18181b;color:white;border-color:#18181b;font-size:12px;padding:6px 14px" id="btn-copiar-gnp" onclick="copiarTextoGNP()">Copiar texto</button>
-      <a href="https://portalintermediarios.gnp.com.mx/sesion" target="_blank" class="btn-reset" style="text-decoration:none;font-size:12px">Abrir portal GNP</a>
-      <span style="font-size:11px;color:#a1a1aa">Desempeño → Logros → Sello Digital</span>
+  <div class="card">
+    <h2>Progreso del Expediente</h2>
+    <div class="status-summary">
+      <div class="stat"><div class="num" id="cnt-ok">0</div><div class="lbl">Listos</div></div>
+      <div class="stat"><div class="num" id="cnt-pend" style="color:#ca8a04">0</div><div class="lbl">Pendientes</div></div>
+      <div class="stat"><div class="num" id="cnt-total">0</div><div class="lbl">Total</div></div>
     </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label"><span id="progress-pct">0% completado</span><span id="status-badge"></span></div>
   </div>
 
-  <!-- ACCESOS RÁPIDOS -->
   <div class="card">
-    <h2>Accesos Rápidos</h2>
-    <div class="links-grid">
-      <div class="link-card" id="link-daf" style="cursor:pointer" onclick="abrirDAF()">
-        <div class="link-title">DAF Allianz</div>
-        <div class="link-sub" id="daf-sub">Emisión de pólizas</div>
-      </div>
-      <div class="link-card">
-        <div class="link-title">Editor Vertical</div>
-        <div class="link-sub">CLAUDE\EDITOR</div>
-      </div>
-      <div class="link-card">
-        <div class="link-title">Editor 2.0</div>
-        <div class="link-sub">CLAUDE\EDITOR 2.0</div>
-      </div>
+    <h2>Documentos Requeridos</h2>
+    <div id="checklist-container"></div>
+  </div>
+
+  <div class="card">
+    <h2>Informacion para Prellenado DAF</h2>
+    <div id="info-container"></div>
+  </div>
+
+  <div class="card">
+    <h2>Notas del Caso</h2>
+    <div class="field">
+      <textarea id="notas" placeholder="Ej. Octavio confirmó que el ingreso del DAF anterior aplica. DAF a las 11 AM..."></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn btn-danger btn-sm" onclick="eliminarCasoActual()">Eliminar</button>
+      <button class="btn btn-primary btn-sm" onclick="guardarCaso()">Guardar Caso</button>
     </div>
   </div>
 
@@ -151,9 +197,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-//  FIREBASE CONFIG — pega aquí los valores de tu proyecto Firebase
-// ══════════════════════════════════════════════════════════════════
+// Mismo proyecto Firebase que la agenda
 const firebaseConfig = {
   apiKey:            "AIzaSyCUAk3Md4ZnVxHtwq1vb3pQexvAytDyRUU",
   authDomain:        "agenda-jorge-d5e8d.firebaseapp.com",
@@ -163,14 +207,8 @@ const firebaseConfig = {
   messagingSenderId: "650957334352",
   appId:             "1:650957334352:web:eb5ee7d4ebf46cf7b62e55"
 };
-// ══════════════════════════════════════════════════════════════════
 
-const FB_READY  = firebaseConfig.apiKey !== "PEGA_AQUI";
-const IS_HOSTED = window.location.hostname.includes('github.io');
-
-function abrirDAF() {
-  window.open('https://ojoslider-star.github.io/daf-allianz/', '_blank');
-}
+const FB_READY = firebaseConfig.apiKey !== "PEGA_AQUI";
 let fbDB = null;
 
 if (FB_READY) {
@@ -181,103 +219,41 @@ if (FB_READY) {
   } catch(e) { console.warn('Firebase init error', e); }
 }
 
-// ── Constantes ────────────────────────────────────────────────────
-const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
-const COMUNES = [
-  { id: 'junta',      hora: '08:00',     label: 'Junta diaria con Octavio',              hint: 'Variable — 5 min a varias horas' },
-  { id: 'pendientes', hora: 'Post-junta', label: 'Procesar pendientes (Octavio + Raquel)', hint: 'SalesUp, agenda, seguimientos' },
-  { id: 'gnp',        hora: 'Post-junta', label: 'KPIs GNP → WhatsApp',                  hint: 'Enviar las 3 capturas del portal', tag: 'gnp' },
-  { id: 'comida',     hora: '14:00',     label: 'Comida',                                hint: '14:00 – 16:00' },
-];
-
-const DIA_EXTRA = {
-  1: [
-    { id: 'foco-semana', hora: 'Mañana', label: 'Revisar foco de la semana',     hint: 'Pendientes + prioridades lun–jue' },
-    { id: 'ia-youtube',  hora: 'Tarde',  label: 'Trabajo IA / Canal YouTube',    hint: 'Automatización, configuración, contenido' },
-  ],
-  2: [
-    { id: 'grab',    hora: '06:00', label: 'Grabación con Octavio — co-work', hint: 'Máx 1 hora', tag: 'grab', antes: true },
-    { id: 'regreso', hora: '07:15', label: 'Regreso a casa',                  antes: true },
-    { id: 'edicion', hora: 'Tarde', label: 'Edición de video',                hint: 'Editor 2.0 — completo o solo gráficos', tag: 'edit' },
-  ],
-  3: [
-    { id: 'edicion', hora: 'Mañana', label: 'Edición de video', hint: 'Objetivo: terminar antes de mediodía', tag: 'edit' },
-  ],
-  4: [
-    { id: 'cierre-semana', hora: 'Tarde', label: 'Cerrar pendientes antes del viernes', hint: '' },
-  ],
-  5: [
-    { id: 'guiones',    hora: 'Mañana', label: '2 guiones para videos de la semana', hint: 'WhatsApp Octavio — si no es día hábil, entregar día anterior. De ley.' },
-    { id: 'propuestas', hora: 'Mañana', label: '2 propuestas de video para retiro',  hint: 'WhatsApp Octavio' },
-  ],
-};
-
-const ALERTAS = {
-  1: { cls: 'alert-gray',   txt: 'Lunes — día tranquilo. Resuelve pendientes y avanza en IA / YouTube.' },
-  2: { cls: 'alert-yellow', txt: 'Martes de grabación. Sales a las 6:00 AM al co-work, regresas ~7:15 AM. Después: junta, pendientes y edición.' },
-  3: { cls: 'alert-blue',   txt: 'Miércoles de edición. Objetivo: terminar el video antes del mediodía.' },
-  4: { cls: 'alert-gray',   txt: 'Jueves — cierra pendientes antes del fin de semana.' },
-  5: { cls: 'alert-gray',   txt: 'Viernes — envía guiones y propuestas de video a Octavio. Salida a las 18:00.' },
-  6: { cls: 'alert-green',  txt: 'Sábado de descanso. Nada de trabajo.' },
-  0: { cls: 'alert-green',  txt: 'Domingo. Descansa — mañana arrancas con todo.' },
-};
-
-const HORA_CIERRE = { 1: '20:00', 2: '20:00', 3: '20:00', 4: '20:00', 5: '18:00', 6: null, 0: null };
-
-const initDate = new Date();
-const diaNum   = initDate.getDay();
-const fechaKey = initDate.toISOString().split('T')[0];
-const storeKey = 'agenda_' + fechaKey;
-const extraKey = 'agenda_extra_' + fechaKey;
-
-// ── Capa de datos (Firebase con fallback a localStorage) ──────────
-let localChecks = {};
-let localExtra  = [];
+// ── Capa de datos ─────────────────────────────────────────────────
+let localCasos = [];
 let lastWriteMs = 0;
 
-function dayRef() { return fbDB ? fbDB.ref('agenda/' + fechaKey) : null; }
+function casosRef() { return fbDB ? fbDB.ref('daf/casos') : null; }
 
-function getChecks() { return FB_READY ? localChecks : JSON.parse(localStorage.getItem(storeKey) || '{}'); }
-function saveChecks(c) {
+function getCasos() {
+  return FB_READY ? localCasos : JSON.parse(localStorage.getItem('daf_casos') || '[]');
+}
+
+function saveCasos(casos) {
   if (FB_READY) {
-    localChecks = c;
+    localCasos = casos;
     lastWriteMs = Date.now();
-    dayRef().child('checks').set(c);
+    const obj = casos.length
+      ? Object.fromEntries(casos.map(c => [c.id, c]))
+      : null;
+    casosRef().set(obj);
   } else {
-    localStorage.setItem(storeKey, JSON.stringify(c));
+    localStorage.setItem('daf_casos', JSON.stringify(casos));
   }
 }
 
-function getExtra() { return FB_READY ? localExtra : JSON.parse(localStorage.getItem(extraKey) || '[]'); }
-function saveExtra(tasks) {
-  if (FB_READY) {
-    localExtra = tasks;
-    lastWriteMs = Date.now();
-    const obj = tasks.length ? Object.fromEntries(tasks.map(t => [t.id, t])) : null;
-    dayRef().child('extra').set(obj);
-  } else {
-    localStorage.setItem(extraKey, JSON.stringify(tasks));
-  }
-}
-
-function loadData(onReady) {
+function loadCasos(onReady) {
   if (!FB_READY) { onReady(); return; }
-  dayRef().once('value', snap => {
+  casosRef().once('value', snap => {
     const d = snap.val() || {};
-    localChecks = d.checks || {};
-    localExtra  = d.extra ? Object.values(d.extra) : [];
+    localCasos = Object.values(d).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
     onReady();
-    // Escucha cambios en tiempo real (desde el otro dispositivo)
-    dayRef().on('value', snap => {
+    // Sync en tiempo real
+    casosRef().on('value', snap => {
       if (Date.now() - lastWriteMs < 1000) return;
       const d = snap.val() || {};
-      localChecks = d.checks || {};
-      localExtra  = d.extra ? Object.values(d.extra) : [];
-      renderTareas();
-      renderExtra();
-      actualizarProgresoCompleto();
+      localCasos = Object.values(d).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+      renderCasos();
     });
     setSyncStatus(true);
   }, () => { setSyncStatus(false); onReady(); });
@@ -288,203 +264,320 @@ function setSyncStatus(online) {
   document.getElementById('sync-label').textContent = online ? 'Sincronizado' : 'Sin conexión';
 }
 
-// ── Lógica de tareas ──────────────────────────────────────────────
-function getTareasHoy() {
-  const HORA_PUB = { 1: '18:45', 2: '18:45', 3: '18:45', 4: '18:45', 5: '19:00', 6: '18:00', 0: '18:00' };
-  const extras   = DIA_EXTRA[diaNum] || [];
-  const esHabil  = diaNum >= 1 && diaNum <= 5;
-  return [
-    ...extras.filter(t => t.antes),
-    ...(esHabil ? COMUNES : []),
-    ...extras.filter(t => !t.antes),
-    { id: 'publicar', hora: HORA_PUB[diaNum], label: 'Publicar video del día', hint: 'Lun–Jue 18:45 · Vie 19:00 · Sáb–Dom 18:00' },
-  ];
-}
-
-function horaAMin(hora) {
-  const m = hora.match(/^(\d{1,2}):(\d{2})$/);
-  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
-}
-
-function esTareaActual(tarea, tareas, idx) {
-  const ahora = new Date();
-  const now = ahora.getHours() * 60 + ahora.getMinutes();
-  const min = horaAMin(tarea.hora);
-  if (min === null) return false;
-  for (let i = idx + 1; i < tareas.length; i++) {
-    const nm = horaAMin(tareas[i].hora);
-    if (nm !== null) return now >= min && now < nm;
+// ── Datos de documentos ───────────────────────────────────────────
+const DOCS = {
+  plus: {
+    docs: [
+      { id: 'ine',    label: 'Identificación oficial vigente con fotografía', hint: 'INE o Pasaporte vigente' },
+      { id: 'cobro',  label: 'Conducto de Cobro', hint: 'Tarjeta de crédito (ambos lados, dígitos tapados) o 1er hoja estado de cuenta débito (máx 3 meses)' },
+      { id: 'dom',    label: 'Comprobante de domicilio', hint: 'Solo si el domicilio en la INE no está actualizado — máx 3 meses' },
+      { id: 'fiscal', label: 'Constancia de Situación Fiscal (SAT)', hint: '' },
+    ],
+    info: [
+      'RFC', 'Nombre Completo', 'Teléfono', 'Correo', 'Domicilio',
+      'Giro o Actividad', 'Ocupación', 'Ingresos Mensuales', 'Nivel de Estudios',
+      'Beneficiarios (Nombre, Parentesco, Porcentaje)',
+      'Plan de Inversión: Producto, Monto, Periodicidad, Plazo',
+      'Experiencia Financiera (Sociedades de inversión, Derivados, Instrumentos de deuda, ETFs, Acciones, Inversiones con dif. monedas)',
+    ]
+  },
+  elite: {
+    docs: [
+      { id: 'ine',    label: 'Identificación oficial vigente con fotografía', hint: 'INE o Pasaporte vigente' },
+      { id: 'edo',    label: 'Estado de Cuenta', hint: 'Vigencia no mayor a 3 meses' },
+      { id: 'curp',   label: 'CURP', hint: '' },
+      { id: 'dom',    label: 'Comprobante de domicilio', hint: 'Solo si el domicilio en la INE no está actualizado — máx 3 meses' },
+      { id: 'fiscal', label: 'Constancia de Situación Fiscal (SAT)', hint: '' },
+    ],
+    info: [
+      'RFC', 'Nombre Completo', 'Teléfono', 'Correo', 'Domicilio',
+      'Giro o Actividad', 'Ocupación', 'Ingresos Mensuales', 'Nivel de Estudios',
+      'Beneficiarios (Nombre, Parentesco, Porcentaje)',
+      'Plan de Inversión: Producto, Monto, Alternativa de Inversión',
+      'Experiencia Financiera (Sociedades de inversión, Derivados, Instrumentos de deuda, ETFs, Acciones, Inversiones con dif. monedas)',
+    ]
+  },
+  patrimonial: {
+    docs: [
+      { id: 'ine',    label: 'Identificación oficial vigente con fotografía', hint: 'INE o Pasaporte vigente' },
+      { id: 'edo',    label: 'Estado de Cuenta', hint: 'Vigencia no mayor a 3 meses' },
+      { id: 'curp',   label: 'CURP', hint: '' },
+      { id: 'dom',    label: 'Comprobante de domicilio', hint: 'Solo si el domicilio en la INE no está actualizado — máx 3 meses' },
+      { id: 'fiscal', label: 'Constancia de Situación Fiscal (SAT)', hint: '' },
+    ],
+    medico: [
+      'Peso y Estatura',
+      'Enfermedades o Lesiones (con fecha y estado actual)',
+      '¿Practica algún deporte peligroso? ¿Cuál?',
+      'Fuma (frecuencia: diario, semanal, mensual)',
+      'Consumo de alcohol (frecuencia, cantidad, tipo)',
+    ],
+    info: [
+      'RFC', 'Nombre Completo', 'Teléfono', 'Correo', 'Domicilio',
+      'Giro o Actividad', 'Ocupación', 'Ingresos Mensuales', 'Nivel de Estudios',
+      'Beneficiarios (Nombre, Parentesco, Porcentaje)',
+      'Plan de Inversión: Producto, Monto, Alternativa de Inversión',
+      'Experiencia Financiera (Sociedades de inversión, Derivados, Instrumentos de deuda, ETFs, Acciones, Inversiones con dif. monedas)',
+    ]
   }
-  return now >= min && now < min + 120;
+};
+
+const PROD_LABELS = { plus: 'OptiMaxx Plus', elite: 'Premier Elite', patrimonial: 'Premier Patrimonial' };
+
+let tipoCliente = 'existente';
+let currentId   = null;
+
+function nuevoCaso() {
+  currentId = null;
+  document.getElementById('cliente').value  = '';
+  document.getElementById('fecha').value    = new Date().toISOString().split('T')[0];
+  document.getElementById('producto').value = 'elite';
+  document.getElementById('notas').value    = '';
+  document.getElementById('caso-id-label').textContent  = '';
+  document.getElementById('form-titulo').textContent     = 'Nuevo Caso';
+  tipoCliente = 'existente';
+  setTipoCliente('existente');
+  renderChecklist({});
+  renderCasos();
+  actualizarBtnGuardar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function renderTareas() {
-  const tareas = getTareasHoy();
-  const checks = getChecks();
-  const container = document.getElementById('task-list');
+function cargarCaso(id) {
+  const casos = getCasos();
+  const caso  = casos.find(c => c.id === id);
+  if (!caso) return;
+  currentId = id;
+  document.getElementById('cliente').value  = caso.cliente  || '';
+  document.getElementById('fecha').value    = caso.fecha    || '';
+  document.getElementById('producto').value = caso.producto || 'elite';
+  document.getElementById('notas').value    = caso.notas    || '';
+  document.getElementById('caso-id-label').textContent = 'ID: ' + id;
+  document.getElementById('form-titulo').textContent   = caso.cliente || 'Caso';
+  tipoCliente = caso.tipoCliente || 'existente';
+  setTipoCliente(tipoCliente, false);
+  renderChecklist(caso.checks || {});
+  renderCasos();
+  actualizarBtnGuardar();
+  document.getElementById('checklist-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-  if (!tareas.length) {
-    container.innerHTML = '<div class="empty-rest">No hay tareas programadas hoy. Descansa.</div>';
+function guardarCaso() {
+  const cliente = document.getElementById('cliente').value.trim();
+  if (!cliente) { alert('Escribe el nombre del cliente.'); return; }
+
+  const checks = leerChecks();
+  const pct    = calcPct(checks, document.getElementById('producto').value);
+
+  const caso = {
+    id: currentId || Date.now().toString(),
+    cliente,
+    fecha:       document.getElementById('fecha').value,
+    producto:    document.getElementById('producto').value,
+    tipoCliente,
+    notas:       document.getElementById('notas').value,
+    checks,
+    pct,
+    updatedAt:   new Date().toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }),
+  };
+
+  const casos = getCasos();
+  const idx   = casos.findIndex(c => c.id === caso.id);
+  if (idx >= 0) { casos[idx] = caso; } else { casos.unshift(caso); }
+  saveCasos(casos);
+  currentId = caso.id;
+
+  document.getElementById('caso-id-label').textContent = 'ID: ' + caso.id;
+  document.getElementById('form-titulo').textContent   = caso.cliente;
+  renderCasos();
+  actualizarBtnGuardar();
+
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent     = 'Guardado';
+  btn.style.background = '#16a34a';
+  setTimeout(() => { actualizarBtnGuardar(); btn.style.background = ''; }, 1500);
+}
+
+function eliminarCasoActual() {
+  if (!currentId) { nuevoCaso(); return; }
+  const cliente = document.getElementById('cliente').value || 'este caso';
+  if (!confirm('¿Eliminar el caso de ' + cliente + '?')) return;
+  const casos = getCasos().filter(c => c.id !== currentId);
+  saveCasos(casos);
+  nuevoCaso();
+}
+
+function leerChecks() {
+  const checks = {};
+  document.querySelectorAll('#checklist-container input[type=checkbox], #info-container input[type=checkbox]').forEach(cb => {
+    checks[cb.id] = cb.checked;
+  });
+  return checks;
+}
+
+function calcPct(checks, producto) {
+  const data = DOCS[producto];
+  const ids  = [];
+  data.docs.forEach(d => ids.push(d.id));
+  if (producto === 'patrimonial') data.medico.forEach((_, i) => ids.push('med_' + i));
+  data.info.forEach((_, i) => ids.push('info_' + i));
+  const total = ids.length;
+  const ok    = ids.filter(id => checks[id]).length;
+  return total ? Math.round((ok / total) * 100) : 0;
+}
+
+function renderCasos() {
+  const casos = getCasos();
+  const lista = document.getElementById('casos-lista');
+  document.getElementById('casos-count').textContent = casos.length ? `(${casos.length})` : '';
+
+  if (!casos.length) {
+    lista.innerHTML = '<div class="empty-state">No hay casos guardados. Llena el formulario y guarda.</div>';
     return;
   }
 
-  container.innerHTML = tareas.map((t, i) => {
-    const done    = !!checks[t.id];
-    const current = !done && esTareaActual(t, tareas, i);
-    const tagMap  = { gnp: ['tag-gnp','GNP'], grab: ['tag-grab','Grabación'], edit: ['tag-edit','Edición'] };
-    const tagHtml = t.tag && tagMap[t.tag]
-      ? `<span class="tag ${tagMap[t.tag][0]}">${tagMap[t.tag][1]}</span>` : '';
+  lista.innerHTML = casos.map(c => {
+    const activo      = c.id === currentId ? 'activo' : '';
+    const badgeClass  = c.pct === 100 ? 'badge-green' : c.pct >= 60 ? 'badge-yellow' : 'badge-red';
+    const badgeLabel  = c.pct === 100 ? 'Listo' : c.pct >= 60 ? 'En proceso' : 'Incompleto';
     return `
-      <div class="task-item${done ? ' done' : ''}${current ? ' current' : ''}" id="item-${t.id}">
-        <input type="checkbox" id="chk-${t.id}" ${done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
-        <div class="task-content">
-          <div class="task-hora">${t.hora}</div>
-          <div class="task-label">${t.label}${tagHtml}</div>
-          ${t.hint ? `<div class="task-hint">${t.hint}</div>` : ''}
+      <div class="caso-item ${activo}" onclick="cargarCaso('${c.id}')">
+        <div class="caso-info">
+          <div class="caso-nombre">${c.cliente}</div>
+          <div class="caso-meta">${PROD_LABELS[c.producto] || c.producto} · ${c.tipoCliente === 'existente' ? 'Existente' : 'Nuevo'} · ${c.updatedAt || ''}</div>
+          <div class="caso-mini-progress"><div class="caso-mini-fill" style="width:${c.pct}%"></div></div>
+        </div>
+        <div class="caso-acciones">
+          <span class="badge ${badgeClass}">${badgeLabel} ${c.pct}%</span>
         </div>
       </div>`;
   }).join('');
-
-  actualizarProgresoCompleto();
 }
 
-function toggleTask(id) {
-  const checks = getChecks();
-  checks[id] = document.getElementById('chk-' + id).checked;
-  saveChecks(checks);
-  const done = checks[id];
-  document.getElementById('item-' + id).classList.toggle('done', done);
-  if (done) document.getElementById('item-' + id).classList.remove('current');
-  actualizarProgresoCompleto();
+function setTipoCliente(tipo, rerender = true) {
+  tipoCliente = tipo;
+  document.getElementById('btn-nuevo').classList.toggle('active', tipo === 'nuevo');
+  document.getElementById('btn-existente').classList.toggle('active', tipo === 'existente');
+  document.getElementById('alert-existente').classList.toggle('hidden', tipo !== 'existente');
+  document.getElementById('alert-nuevo').classList.toggle('hidden', tipo !== 'nuevo');
+  if (rerender) renderChecklist({});
 }
 
-function getExtraLocal() { return FB_READY ? localExtra : JSON.parse(localStorage.getItem(extraKey) || '[]'); }
+function renderChecklist(savedChecks) {
+  const producto      = document.getElementById('producto').value;
+  const data          = DOCS[producto];
+  const container     = document.getElementById('checklist-container');
+  const infoContainer = document.getElementById('info-container');
 
-function agregarTarea() {
-  const input = document.getElementById('nueva-tarea');
-  const label = input.value.trim();
-  if (!label) return;
-  const tasks = getExtra();
-  tasks.push({ id: 'x_' + Date.now(), label, done: false });
-  saveExtra(tasks);
-  input.value = '';
-  renderExtra();
-  actualizarProgresoCompleto();
-}
+  if (savedChecks === undefined) savedChecks = leerChecks();
 
-function toggleExtra(id) {
-  const tasks = getExtra();
-  const t = tasks.find(t => t.id === id);
-  if (t) { t.done = !t.done; saveExtra(tasks); }
-  renderExtra();
-  actualizarProgresoCompleto();
-}
-
-function eliminarExtra(id) {
-  saveExtra(getExtra().filter(t => t.id !== id));
-  renderExtra();
-  actualizarProgresoCompleto();
-}
-
-function renderExtra() {
-  const tasks   = getExtra();
-  const list    = document.getElementById('custom-task-list');
-  const divider = document.getElementById('custom-divider');
-  divider.style.display = tasks.length ? 'block' : 'none';
-  list.innerHTML = tasks.map(t => `
-    <div class="task-item${t.done ? ' done' : ''}" id="xitem-${t.id}">
-      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleExtra('${t.id}')">
-      <div class="task-content">
-        <div class="task-hora">Imprevisto</div>
-        <div class="task-label">${t.label}</div>
-      </div>
-      <button onclick="eliminarExtra('${t.id}')" title="Eliminar"
-              style="background:none;border:none;cursor:pointer;color:#d4d4d8;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0"
-              onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#d4d4d8'">×</button>
-    </div>`).join('');
-}
-
-function actualizarProgresoCompleto() {
-  const tareas = getTareasHoy();
-  const checks = getChecks();
-  const extra  = getExtra();
-  const total  = tareas.length + extra.length;
-  const ok     = tareas.filter(t => checks[t.id]).length + extra.filter(t => t.done).length;
-  const pct    = total ? Math.round((ok / total) * 100) : 0;
-  document.getElementById('prog-fill').style.width  = pct + '%';
-  document.getElementById('prog-label').textContent = ok + ' de ' + total + ' tareas';
-  document.getElementById('prog-pct').textContent   = pct + '%';
-}
-
-function actualizarProgreso() { actualizarProgresoCompleto(); }
-
-function generarTextoGNP() {
-  const MESES_U = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-  const d = new Date();
-  return `INDICADORES TRIMESTRALES ENVIADOS EL ${d.getDate()} DE ${MESES_U[d.getMonth()]} DEL ${d.getFullYear()}`;
-}
-
-function copiarTextoGNP() {
-  const texto = generarTextoGNP();
-  navigator.clipboard.writeText(texto).then(() => {
-    const btn = document.getElementById('btn-copiar-gnp');
-    btn.textContent = 'Copiado';
-    setTimeout(() => { btn.textContent = 'Copiar texto'; }, 1500);
-  });
-}
-
-function resetearDia() {
-  if (!confirm('¿Reiniciar todas las tareas de hoy? Esto también borrará los imprevistos agregados.')) return;
-  if (FB_READY) {
-    localChecks = {};
-    localExtra  = [];
-    dayRef().remove();
-  } else {
-    localStorage.removeItem(storeKey);
-    localStorage.removeItem(extraKey);
+  let html = '';
+  if (tipoCliente === 'existente') {
+    html += '<div class="alert alert-green" style="margin-bottom:12px">Documentos ya en expediente. Marca los que confirmaste tener disponibles.</div>';
   }
-  renderTareas();
-  renderExtra();
-  actualizarProgresoCompleto();
-}
 
-function actualizarReloj() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById('hora-actual').textContent = h + ':' + m;
-  const hr = now.getHours();
-  document.getElementById('header-saludo').textContent =
-    (hr < 12 ? 'Buenos días' : hr < 19 ? 'Buenas tardes' : 'Buenas noches') + ', Jorge';
-}
-
-function init() {
-  document.getElementById('header-fecha').textContent =
-    DIAS[diaNum] + ' ' + initDate.getDate() + ' de ' + MESES[initDate.getMonth()] + ' ' + initDate.getFullYear();
-
-  const cierre = HORA_CIERRE[diaNum];
-  document.getElementById('header-cierre').innerHTML = cierre
-    ? 'cierre <span class="hora-fin">' + cierre + '</span>'
-    : 'día de descanso';
-
-  const a = ALERTAS[diaNum];
-  const alertEl = document.getElementById('alerta-dia');
-  alertEl.className = 'alert ' + a.cls;
-  alertEl.textContent = a.txt;
-
-  actualizarReloj();
-  setInterval(actualizarReloj, 30000);
-
-  document.getElementById('gnp-texto').textContent = generarTextoGNP();
-  if (diaNum === 0 || diaNum === 6) document.getElementById('card-gnp').style.display = 'none';
-
-  loadData(() => {
-    renderTareas();
-    renderExtra();
+  html += '<div class="section-title">Documentacion</div><div class="checklist">';
+  data.docs.forEach(doc => {
+    const checked = savedChecks[doc.id] ? 'checked' : '';
+    html += `
+      <div class="check-item ${checked ? 'checked' : ''}" id="item-${doc.id}">
+        <input type="checkbox" id="${doc.id}" ${checked} onchange="toggleCheck('${doc.id}')">
+        <div class="check-label">
+          <strong>${doc.label}</strong>
+          ${doc.hint ? `<span>${doc.hint}</span>` : ''}
+        </div>
+      </div>`;
   });
+  html += '</div>';
+
+  if (producto === 'patrimonial') {
+    html += '<div class="section-title" style="margin-top:20px">Cuestionario Medico <span class="tag tag-med">Patrimonial</span></div><div class="checklist">';
+    data.medico.forEach((item, i) => {
+      const id      = `med_${i}`;
+      const checked = savedChecks[id] ? 'checked' : '';
+      html += `
+        <div class="check-item ${checked ? 'checked' : ''}" id="item-${id}">
+          <input type="checkbox" id="${id}" ${checked} onchange="toggleCheck('${id}')">
+          <div class="check-label"><strong>${item}</strong></div>
+        </div>`;
+    });
+    html += '</div>';
+  }
+  container.innerHTML = html;
+
+  let infoHtml = '<div class="section-title">Datos para el Formulario</div><div class="checklist">';
+  data.info.forEach((item, i) => {
+    const id      = `info_${i}`;
+    const checked = savedChecks[id] ? 'checked' : '';
+    infoHtml += `
+      <div class="check-item ${checked ? 'checked' : ''}" id="item-${id}">
+        <input type="checkbox" id="${id}" ${checked} onchange="toggleCheck('${id}')">
+        <div class="check-label"><strong>${item}</strong></div>
+      </div>`;
+  });
+  infoHtml += '</div>';
+  infoContainer.innerHTML = infoHtml;
+
+  actualizarProgreso();
 }
 
-init();
+function toggleCheck(id) {
+  const cb = document.getElementById(id);
+  document.getElementById('item-' + id).classList.toggle('checked', cb.checked);
+  actualizarProgreso();
+}
+
+function actualizarProgreso() {
+  const checkboxes = document.querySelectorAll('#checklist-container input[type=checkbox], #info-container input[type=checkbox]');
+  const total      = checkboxes.length;
+  const ok         = Array.from(checkboxes).filter(c => c.checked).length;
+  const pct        = total ? Math.round((ok / total) * 100) : 0;
+
+  document.getElementById('cnt-ok').textContent    = ok;
+  document.getElementById('cnt-pend').textContent  = total - ok;
+  document.getElementById('cnt-total').textContent = total;
+  document.getElementById('progress-fill').style.width   = pct + '%';
+  document.getElementById('progress-pct').textContent    = pct + '% completado';
+
+  const badge = document.getElementById('status-badge');
+  if (pct === 100)    badge.innerHTML = '<span class="badge badge-green">Listo para emitir</span>';
+  else if (pct >= 60) badge.innerHTML = '<span class="badge badge-yellow">En proceso</span>';
+  else                badge.innerHTML = '<span class="badge badge-red">Incompleto</span>';
+}
+
+function actualizarBtnGuardar() {
+  const btn = document.querySelector('button[onclick="guardarCaso()"]');
+  if (!btn) return;
+  btn.textContent = currentId ? 'Actualizar Caso' : 'Guardar Caso';
+}
+
+document.getElementById('producto').addEventListener('change', () => renderChecklist({}));
+
+document.getElementById('cliente').addEventListener('input', () => {
+  const inputName = document.getElementById('cliente').value.trim();
+  document.getElementById('form-titulo').textContent = inputName || (currentId ? 'Caso Actual' : 'Nuevo Caso');
+  if (currentId) {
+    const casos     = getCasos();
+    const casoActual = casos.find(c => c.id === currentId);
+    if (casoActual && casoActual.cliente !== inputName) {
+      currentId = null;
+      document.getElementById('caso-id-label').textContent = '';
+      renderCasos();
+      actualizarBtnGuardar();
+    }
+  }
+});
+
+// Iniciar
+document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+renderChecklist({});
+actualizarBtnGuardar();
+
+loadCasos(() => {
+  renderCasos();
+  const casos = getCasos();
+  if (casos.length) cargarCaso(casos[0].id);
+});
 </script>
 </body>
 </html>
