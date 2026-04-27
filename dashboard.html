@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Diaria — Jorge</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f5; color: #18181b; font-size: 14px; }
+
+  header { background: #18181b; color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 18px; font-weight: 600; }
+  .header-sub { font-size: 12px; opacity: 0.6; margin-top: 2px; }
+  .header-right { text-align: right; }
+  .header-hora { font-size: 26px; font-weight: 700; }
+  .header-cierre { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .hora-fin { background: #ef4444; color: white; padding: 1px 6px; border-radius: 4px; font-weight: 700; }
+
+  .sync-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.7; margin-top: 4px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .sync-dot.offline { background: #f59e0b; }
+
+  .container { max-width: 760px; margin: 24px auto; padding: 0 16px; }
+
+  .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 16px; border: 1px solid #e4e4e7; }
+  .card h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .alert-yellow { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+  .alert-blue   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+  .alert-green  { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+  .alert-gray   { background: #f4f4f5; border: 1px solid #e4e4e7; color: #52525b; }
+
+  .progress-bar { height: 6px; background: #e4e4e7; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; background: #18181b; border-radius: 3px; transition: width 0.3s; }
+  .progress-label { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #71717a; }
+
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  .task-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e4e4e7; transition: all 0.15s; }
+  .task-item.done    { background: #f0fdf4; border-color: #bbf7d0; opacity: 0.65; }
+  .task-item.current { background: #fffbeb; border: 2px solid #fbbf24; }
+  .task-item input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; cursor: pointer; accent-color: #18181b; flex-shrink: 0; }
+  .task-content { flex: 1; }
+  .task-hora  { font-size: 11px; font-weight: 700; color: #a1a1aa; letter-spacing: 0.04em; margin-bottom: 2px; }
+  .task-label { font-weight: 500; font-size: 14px; }
+  .task-hint  { font-size: 12px; color: #71717a; margin-top: 2px; }
+  .task-item.done .task-label { text-decoration: line-through; color: #a1a1aa; }
+
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
+  .tag-gnp       { background: #fee2e2; color: #dc2626; }
+  .tag-grab      { background: #fef9c3; color: #92400e; }
+  .tag-edit      { background: #eff6ff; color: #1d4ed8; }
+
+  .btn-reset { padding: 5px 12px; border-radius: 6px; border: 1px solid #e4e4e7; background: white; color: #71717a; font-size: 11px; cursor: pointer; font-weight: 500; }
+  .btn-reset:hover { background: #f4f4f5; }
+
+  .links-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+  .link-card { flex: 1; min-width: 140px; padding: 12px 14px; border-radius: 8px; border: 1px solid #e4e4e7; text-decoration: none; color: #18181b; background: #fafafa; font-size: 13px; transition: all 0.15s; display: block; }
+  .link-card:hover { background: #f0f0f0; border-color: #d4d4d8; }
+  .link-title { font-weight: 600; margin-bottom: 2px; }
+  .link-sub   { font-size: 11px; color: #71717a; }
+
+  .empty-rest { text-align: center; padding: 32px; color: #71717a; font-size: 14px; }
+  .loading-tasks { text-align: center; padding: 24px; color: #a1a1aa; font-size: 13px; }
+
+  @media (max-width: 600px) { .links-grid { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1 id="header-saludo">Buenos días, Jorge</h1>
+    <div class="header-sub" id="header-fecha"></div>
+    <div class="sync-badge" id="sync-badge" style="display:none">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">Sincronizado</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-hora" id="hora-actual"></div>
+    <div class="header-cierre" id="header-cierre"></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ALERTA DEL DÍA -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div id="alerta-dia" class="alert"></div>
+  </div>
+
+  <!-- PROGRESO -->
+  <div class="card">
+    <h2>Progreso del Día <button class="btn-reset" onclick="resetearDia()">Reiniciar</button></h2>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="progress-label">
+      <span id="prog-label">0 de 0 tareas</span>
+      <span id="prog-pct">0%</span>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="card">
+    <h2>Tareas de Hoy</h2>
+    <div class="task-list" id="task-list"><div class="loading-tasks">Cargando...</div></div>
+    <div id="custom-divider" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#a1a1aa;padding:14px 0 6px;display:none">Imprevistos y pendientes extra</div>
+    <div class="task-list" id="custom-task-list"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <input type="text" id="nueva-tarea" placeholder="Agregar imprevisto o pendiente del día..."
+             style="flex:1;border:1px solid #d4d4d8;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;background:#fafafa;color:#18181b"
+             onkeydown="if(event.key==='Enter')agregarTarea()">
+      <button onclick="agregarTarea()" class="btn-reset" style="background:#18181b;color:white;border-color:#18181b;white-space:nowrap;padding:8px 14px">+ Agregar</button>
+    </div>
+  </div>
+
+  <!-- GNP TEXTO -->
+  <div class="card" id="card-gnp">
+    <h2>GNP → WhatsApp Octavio</h2>
+    <div style="background:#f4f4f5;border:1px solid #e4e4e7;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:600;letter-spacing:0.02em;color:#18181b" id="gnp-texto"></div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <button class="btn-reset" style="background:#18181b;color:white;border-color:#18181b;font-size:12px;padding:6px 14px" id="btn-copiar-gnp" onclick="copiarTextoGNP()">Copiar texto</button>
+      <a href="https://portalintermediarios.gnp.com.mx/sesion" target="_blank" class="btn-reset" style="text-decoration:none;font-size:12px">Abrir portal GNP</a>
+      <span style="font-size:11px;color:#a1a1aa">Desempeño → Logros → Sello Digital</span>
+    </div>
+  </div>
+
+  <!-- ACCESOS RÁPIDOS -->
+  <div class="card">
+    <h2>Accesos Rápidos</h2>
+    <div class="links-grid">
+      <div class="link-card" id="link-daf" style="cursor:pointer" onclick="abrirDAF()">
+        <div class="link-title">DAF Allianz</div>
+        <div class="link-sub" id="daf-sub">Emisión de pólizas</div>
+      </div>
+      <div class="link-card">
+        <div class="link-title">Editor Vertical</div>
+        <div class="link-sub">CLAUDE\EDITOR</div>
+      </div>
+      <div class="link-card">
+        <div class="link-title">Editor 2.0</div>
+        <div class="link-sub">CLAUDE\EDITOR 2.0</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  FIREBASE CONFIG — pega aquí los valores de tu proyecto Firebase
+// ══════════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyCUAk3Md4ZnVxHtwq1vb3pQexvAytDyRUU",
+  authDomain:        "agenda-jorge-d5e8d.firebaseapp.com",
+  databaseURL:       "https://agenda-jorge-d5e8d-default-rtdb.firebaseio.com",
+  projectId:         "agenda-jorge-d5e8d",
+  storageBucket:     "agenda-jorge-d5e8d.firebasestorage.app",
+  messagingSenderId: "650957334352",
+  appId:             "1:650957334352:web:eb5ee7d4ebf46cf7b62e55"
+};
+// ══════════════════════════════════════════════════════════════════
+
+const FB_READY  = firebaseConfig.apiKey !== "PEGA_AQUI";
+const IS_HOSTED = window.location.hostname.includes('github.io');
+
+function abrirDAF() {
+  window.open('https://ojoslider-star.github.io/daf-allianz/', '_blank');
+}
+let fbDB = null;
+
+if (FB_READY) {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    fbDB = firebase.database();
+    document.getElementById('sync-badge').style.display = 'inline-flex';
+  } catch(e) { console.warn('Firebase init error', e); }
+}
+
+// ── Constantes ────────────────────────────────────────────────────
+const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+const COMUNES = [
+  { id: 'junta',      hora: '08:00',     label: 'Junta diaria con Octavio',              hint: 'Variable — 5 min a varias horas' },
+  { id: 'pendientes', hora: 'Post-junta', label: 'Procesar pendientes (Octavio + Raquel)', hint: 'SalesUp, agenda, seguimientos' },
+  { id: 'gnp',        hora: 'Post-junta', label: 'KPIs GNP → WhatsApp',                  hint: 'Enviar las 3 capturas del portal', tag: 'gnp' },
+  { id: 'comida',     hora: '14:00',     label: 'Comida',                                hint: '14:00 – 16:00' },
+];
+
+const DIA_EXTRA = {
+  1: [
+    { id: 'foco-semana', hora: 'Mañana', label: 'Revisar foco de la semana',     hint: 'Pendientes + prioridades lun–jue' },
+    { id: 'ia-youtube',  hora: 'Tarde',  label: 'Trabajo IA / Canal YouTube',    hint: 'Automatización, configuración, contenido' },
+  ],
+  2: [
+    { id: 'grab',    hora: '06:00', label: 'Grabación con Octavio — co-work', hint: 'Máx 1 hora', tag: 'grab', antes: true },
+    { id: 'regreso', hora: '07:15', label: 'Regreso a casa',                  antes: true },
+    { id: 'edicion', hora: 'Tarde', label: 'Edición de video',                hint: 'Editor 2.0 — completo o solo gráficos', tag: 'edit' },
+  ],
+  3: [
+    { id: 'edicion', hora: 'Mañana', label: 'Edición de video', hint: 'Objetivo: terminar antes de mediodía', tag: 'edit' },
+  ],
+  4: [
+    { id: 'cierre-semana', hora: 'Tarde', label: 'Cerrar pendientes antes del viernes', hint: '' },
+  ],
+  5: [
+    { id: 'guiones',    hora: 'Mañana', label: '2 guiones para videos de la semana', hint: 'WhatsApp Octavio — si no es día hábil, entregar día anterior. De ley.' },
+    { id: 'propuestas', hora: 'Mañana', label: '2 propuestas de video para retiro',  hint: 'WhatsApp Octavio' },
+  ],
+};
+
+const ALERTAS = {
+  1: { cls: 'alert-gray',   txt: 'Lunes — día tranquilo. Resuelve pendientes y avanza en IA / YouTube.' },
+  2: { cls: 'alert-yellow', txt: 'Martes de grabación. Sales a las 6:00 AM al co-work, regresas ~7:15 AM. Después: junta, pendientes y edición.' },
+  3: { cls: 'alert-blue',   txt: 'Miércoles de edición. Objetivo: terminar el video antes del mediodía.' },
+  4: { cls: 'alert-gray',   txt: 'Jueves — cierra pendientes antes del fin de semana.' },
+  5: { cls: 'alert-gray',   txt: 'Viernes — envía guiones y propuestas de video a Octavio. Salida a las 18:00.' },
+  6: { cls: 'alert-green',  txt: 'Sábado de descanso. Nada de trabajo.' },
+  0: { cls: 'alert-green',  txt: 'Domingo. Descansa — mañana arrancas con todo.' },
+};
+
+const HORA_CIERRE = { 1: '20:00', 2: '20:00', 3: '20:00', 4: '20:00', 5: '18:00', 6: null, 0: null };
+
+const initDate = new Date();
+const diaNum   = initDate.getDay();
+const fechaKey = initDate.toISOString().split('T')[0];
+const storeKey = 'agenda_' + fechaKey;
+const extraKey = 'agenda_extra_' + fechaKey;
+
+// ── Capa de datos (Firebase con fallback a localStorage) ──────────
+let localChecks = {};
+let localExtra  = [];
+let lastWriteMs = 0;
+
+function dayRef() { return fbDB ? fbDB.ref('agenda/' + fechaKey) : null; }
+
+function getChecks() { return FB_READY ? localChecks : JSON.parse(localStorage.getItem(storeKey) || '{}'); }
+function saveChecks(c) {
+  if (FB_READY) {
+    localChecks = c;
+    lastWriteMs = Date.now();
+    dayRef().child('checks').set(c);
+  } else {
+    localStorage.setItem(storeKey, JSON.stringify(c));
+  }
+}
+
+function getExtra() { return FB_READY ? localExtra : JSON.parse(localStorage.getItem(extraKey) || '[]'); }
+function saveExtra(tasks) {
+  if (FB_READY) {
+    localExtra = tasks;
+    lastWriteMs = Date.now();
+    const obj = tasks.length ? Object.fromEntries(tasks.map(t => [t.id, t])) : null;
+    dayRef().child('extra').set(obj);
+  } else {
+    localStorage.setItem(extraKey, JSON.stringify(tasks));
+  }
+}
+
+function loadData(onReady) {
+  if (!FB_READY) { onReady(); return; }
+  dayRef().once('value', snap => {
+    const d = snap.val() || {};
+    localChecks = d.checks || {};
+    localExtra  = d.extra ? Object.values(d.extra) : [];
+    onReady();
+    // Escucha cambios en tiempo real (desde el otro dispositivo)
+    dayRef().on('value', snap => {
+      if (Date.now() - lastWriteMs < 1000) return;
+      const d = snap.val() || {};
+      localChecks = d.checks || {};
+      localExtra  = d.extra ? Object.values(d.extra) : [];
+      renderTareas();
+      renderExtra();
+      actualizarProgresoCompleto();
+    });
+    setSyncStatus(true);
+  }, () => { setSyncStatus(false); onReady(); });
+}
+
+function setSyncStatus(online) {
+  document.getElementById('sync-dot').className  = 'sync-dot' + (online ? '' : ' offline');
+  document.getElementById('sync-label').textContent = online ? 'Sincronizado' : 'Sin conexión';
+}
+
+// ── Lógica de tareas ──────────────────────────────────────────────
+function getTareasHoy() {
+  const HORA_PUB = { 1: '18:45', 2: '18:45', 3: '18:45', 4: '18:45', 5: '19:00', 6: '18:00', 0: '18:00' };
+  const extras   = DIA_EXTRA[diaNum] || [];
+  const esHabil  = diaNum >= 1 && diaNum <= 5;
+  return [
+    ...extras.filter(t => t.antes),
+    ...(esHabil ? COMUNES : []),
+    ...extras.filter(t => !t.antes),
+    { id: 'publicar', hora: HORA_PUB[diaNum], label: 'Publicar video del día', hint: 'Lun–Jue 18:45 · Vie 19:00 · Sáb–Dom 18:00' },
+  ];
+}
+
+function horaAMin(hora) {
+  const m = hora.match(/^(\d{1,2}):(\d{2})$/);
+  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
+}
+
+function esTareaActual(tarea, tareas, idx) {
+  const ahora = new Date();
+  const now = ahora.getHours() * 60 + ahora.getMinutes();
+  const min = horaAMin(tarea.hora);
+  if (min === null) return false;
+  for (let i = idx + 1; i < tareas.length; i++) {
+    const nm = horaAMin(tareas[i].hora);
+    if (nm !== null) return now >= min && now < nm;
+  }
+  return now >= min && now < min + 120;
+}
+
+function renderTareas() {
+  const tareas = getTareasHoy();
+  const checks = getChecks();
+  const container = document.getElementById('task-list');
+
+  if (!tareas.length) {
+    container.innerHTML = '<div class="empty-rest">No hay tareas programadas hoy. Descansa.</div>';
+    return;
+  }
+
+  container.innerHTML = tareas.map((t, i) => {
+    const done    = !!checks[t.id];
+    const current = !done && esTareaActual(t, tareas, i);
+    const tagMap  = { gnp: ['tag-gnp','GNP'], grab: ['tag-grab','Grabación'], edit: ['tag-edit','Edición'] };
+    const tagHtml = t.tag && tagMap[t.tag]
+      ? `<span class="tag ${tagMap[t.tag][0]}">${tagMap[t.tag][1]}</span>` : '';
+    return `
+      <div class="task-item${done ? ' done' : ''}${current ? ' current' : ''}" id="item-${t.id}">
+        <input type="checkbox" id="chk-${t.id}" ${done ? 'checked' : ''} onchange="toggleTask('${t.id}')">
+        <div class="task-content">
+          <div class="task-hora">${t.hora}</div>
+          <div class="task-label">${t.label}${tagHtml}</div>
+          ${t.hint ? `<div class="task-hint">${t.hint}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  actualizarProgresoCompleto();
+}
+
+function toggleTask(id) {
+  const checks = getChecks();
+  checks[id] = document.getElementById('chk-' + id).checked;
+  saveChecks(checks);
+  const done = checks[id];
+  document.getElementById('item-' + id).classList.toggle('done', done);
+  if (done) document.getElementById('item-' + id).classList.remove('current');
+  actualizarProgresoCompleto();
+}
+
+function getExtraLocal() { return FB_READY ? localExtra : JSON.parse(localStorage.getItem(extraKey) || '[]'); }
+
+function agregarTarea() {
+  const input = document.getElementById('nueva-tarea');
+  const label = input.value.trim();
+  if (!label) return;
+  const tasks = getExtra();
+  tasks.push({ id: 'x_' + Date.now(), label, done: false });
+  saveExtra(tasks);
+  input.value = '';
+  renderExtra();
+  actualizarProgresoCompleto();
+}
+
+function toggleExtra(id) {
+  const tasks = getExtra();
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.done = !t.done; saveExtra(tasks); }
+  renderExtra();
+  actualizarProgresoCompleto();
+}
+
+function eliminarExtra(id) {
+  saveExtra(getExtra().filter(t => t.id !== id));
+  renderExtra();
+  actualizarProgresoCompleto();
+}
+
+function renderExtra() {
+  const tasks   = getExtra();
+  const list    = document.getElementById('custom-task-list');
+  const divider = document.getElementById('custom-divider');
+  divider.style.display = tasks.length ? 'block' : 'none';
+  list.innerHTML = tasks.map(t => `
+    <div class="task-item${t.done ? ' done' : ''}" id="xitem-${t.id}">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleExtra('${t.id}')">
+      <div class="task-content">
+        <div class="task-hora">Imprevisto</div>
+        <div class="task-label">${t.label}</div>
+      </div>
+      <button onclick="eliminarExtra('${t.id}')" title="Eliminar"
+              style="background:none;border:none;cursor:pointer;color:#d4d4d8;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0"
+              onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#d4d4d8'">×</button>
+    </div>`).join('');
+}
+
+function actualizarProgresoCompleto() {
+  const tareas = getTareasHoy();
+  const checks = getChecks();
+  const extra  = getExtra();
+  const total  = tareas.length + extra.length;
+  const ok     = tareas.filter(t => checks[t.id]).length + extra.filter(t => t.done).length;
+  const pct    = total ? Math.round((ok / total) * 100) : 0;
+  document.getElementById('prog-fill').style.width  = pct + '%';
+  document.getElementById('prog-label').textContent = ok + ' de ' + total + ' tareas';
+  document.getElementById('prog-pct').textContent   = pct + '%';
+}
+
+function actualizarProgreso() { actualizarProgresoCompleto(); }
+
+function generarTextoGNP() {
+  const MESES_U = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const d = new Date();
+  return `INDICADORES TRIMESTRALES ENVIADOS EL ${d.getDate()} DE ${MESES_U[d.getMonth()]} DEL ${d.getFullYear()}`;
+}
+
+function copiarTextoGNP() {
+  const texto = generarTextoGNP();
+  navigator.clipboard.writeText(texto).then(() => {
+    const btn = document.getElementById('btn-copiar-gnp');
+    btn.textContent = 'Copiado';
+    setTimeout(() => { btn.textContent = 'Copiar texto'; }, 1500);
+  });
+}
+
+function resetearDia() {
+  if (!confirm('¿Reiniciar todas las tareas de hoy? Esto también borrará los imprevistos agregados.')) return;
+  if (FB_READY) {
+    localChecks = {};
+    localExtra  = [];
+    dayRef().remove();
+  } else {
+    localStorage.removeItem(storeKey);
+    localStorage.removeItem(extraKey);
+  }
+  renderTareas();
+  renderExtra();
+  actualizarProgresoCompleto();
+}
+
+function actualizarReloj() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('hora-actual').textContent = h + ':' + m;
+  const hr = now.getHours();
+  document.getElementById('header-saludo').textContent =
+    (hr < 12 ? 'Buenos días' : hr < 19 ? 'Buenas tardes' : 'Buenas noches') + ', Jorge';
+}
+
+function init() {
+  document.getElementById('header-fecha').textContent =
+    DIAS[diaNum] + ' ' + initDate.getDate() + ' de ' + MESES[initDate.getMonth()] + ' ' + initDate.getFullYear();
+
+  const cierre = HORA_CIERRE[diaNum];
+  document.getElementById('header-cierre').innerHTML = cierre
+    ? 'cierre <span class="hora-fin">' + cierre + '</span>'
+    : 'día de descanso';
+
+  const a = ALERTAS[diaNum];
+  const alertEl = document.getElementById('alerta-dia');
+  alertEl.className = 'alert ' + a.cls;
+  alertEl.textContent = a.txt;
+
+  actualizarReloj();
+  setInterval(actualizarReloj, 30000);
+
+  document.getElementById('gnp-texto').textContent = generarTextoGNP();
+  if (diaNum === 0 || diaNum === 6) document.getElementById('card-gnp').style.display = 'none';
+
+  loadData(() => {
+    renderTareas();
+    renderExtra();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
