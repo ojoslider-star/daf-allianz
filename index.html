@@ -194,6 +194,7 @@
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
 
 <script>
@@ -214,8 +215,21 @@ let fbDB = null;
 if (FB_READY) {
   try {
     firebase.initializeApp(firebaseConfig);
-    fbDB = firebase.database();
-    document.getElementById('sync-badge').style.display = 'inline-flex';
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        fbDB = firebase.database();
+        document.getElementById('sync-badge').style.display = 'inline-flex';
+        loadCasos(() => {
+          renderCasos();
+          const casos = getCasos();
+          if (casos.length) cargarCaso(casos[0].id);
+        });
+      })
+      .catch(() => loadCasos(() => {
+        renderCasos();
+        const casos = getCasos();
+        if (casos.length) cargarCaso(casos[0].id);
+      }));
   } catch(e) { console.warn('Firebase init error', e); }
 }
 
@@ -426,6 +440,12 @@ function calcPct(checks, producto) {
   return total ? Math.round((ok / total) * 100) : 0;
 }
 
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+}
+
 function renderCasos() {
   const casos = getCasos();
   const lista = document.getElementById('casos-lista');
@@ -443,8 +463,8 @@ function renderCasos() {
     return `
       <div class="caso-item ${activo}" onclick="cargarCaso('${c.id}')">
         <div class="caso-info">
-          <div class="caso-nombre">${c.cliente}</div>
-          <div class="caso-meta">${PROD_LABELS[c.producto] || c.producto} · ${c.tipoCliente === 'existente' ? 'Existente' : 'Nuevo'} · ${c.updatedAt || ''}</div>
+          <div class="caso-nombre">${escapeHtml(c.cliente)}</div>
+          <div class="caso-meta">${escapeHtml(PROD_LABELS[c.producto] || c.producto)} · ${c.tipoCliente === 'existente' ? 'Existente' : 'Nuevo'} · ${escapeHtml(c.updatedAt || '')}</div>
           <div class="caso-mini-progress"><div class="caso-mini-fill" style="width:${c.pct}%"></div></div>
         </div>
         <div class="caso-acciones">
@@ -573,7 +593,7 @@ document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 renderChecklist({});
 actualizarBtnGuardar();
 
-loadCasos(() => {
+if (!FB_READY) loadCasos(() => {
   renderCasos();
   const casos = getCasos();
   if (casos.length) cargarCaso(casos[0].id);
